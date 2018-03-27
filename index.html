@@ -1,0 +1,364 @@
+<script src="http://vnntu.com/js/moment.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+const config = {
+	interval: 10000,
+	url: 'https://api.mrawesome.cloud/election/vote/list',
+	chase: '20180331T2000',
+	minVote: 40,
+	perPixel: 20,
+	preChaseMsg: 'starting in ',
+}
+const Request = {
+    get: (url, onsuccess, onerr) => {
+        const request = new XMLHttpRequest()
+        request.open('GET', url, true)
+        request.send(null)
+        request.onreadystatechange = () => {
+            if (request.readyState === 4) {
+            	switch (request.status) {
+            		case 200:
+	            		const type = request.getResponseHeader('Content-Type')
+		                if (type.indexOf('text') !== 1) {
+		                    onsuccess(request.responseText)
+		                }
+		                break;
+	                case 404:
+	                	onerr()
+	                	break;
+	                default:
+            	}
+            }
+        }
+    },
+}
+const Helper = {
+	toDom: ({ tag='div', id, classes, text }) => {
+		const el = document.createElement(tag)
+		if (id) {
+			el.id = id
+		}
+		if (classes) {
+			classes.forEach(clazz => {
+				el.classList.add(clazz)
+			})
+		}
+		el.innerHTML = text ? text : ''
+		return el
+	},
+	toId: (name) => {
+		return name.toLowerCase().split(' ').join('-')
+	},
+}
+class ChaseManager {
+	constructor() {
+		this.summary = {
+			totalVotes: 0,
+		}
+		this.perPixel = config.perPixel
+		this.buildPage()
+	}
+	buildPage() {
+		const parent = document.getElementsByClassName('entry-content')[0]
+		const electionSummary = {
+			id: 'election-summary',
+			text: 'total votes opened: 0'
+		}
+		const electionSummaryEl = Helper.toDom(electionSummary)
+		this.summary.electionSummaryEl = electionSummaryEl
+		parent.append(electionSummaryEl)
+		const progressContainer = {
+			classes: [
+				'container'
+			],
+		}
+		const progressContainerChase = {
+			classes: [
+				'minimum'
+			],
+		}
+		const progress = {
+			classes: [
+				'progress'
+			],
+		}
+		const progressBar = {
+			id: 'election-progress-bar',
+			classes: [
+				'progress-bar'
+			],
+		}
+		const progressSpan = {
+			id: 'election-progress-span',
+			classes: [
+				'progress-span'
+			],
+			text: `0/${config.minVote}`,
+		}
+		const progressNote = {
+			classes: [
+				'progress-note'
+			],
+			text: `the election requires a minimum of ${config.minVote} valid votes`,
+		}
+		const progressContainerEl = Helper.toDom(progressContainer)
+		const progressContainerChaseEl = Helper.toDom(progressContainerChase)
+		const progressEl = Helper.toDom(progress)
+		const progressBarEl = Helper.toDom(progressBar)
+		const progressSpanEl = Helper.toDom(progressSpan)
+		const progressNoteEl = Helper.toDom(progressNote)
+		this.summary.progressBarEl = progressBarEl
+		this.summary.progressSpanEl = progressSpanEl
+		parent.append(progressContainerEl)
+		progressContainerEl.append(progressContainerChaseEl)
+		progressContainerChaseEl.append(progressEl)
+		progressEl.append(progressBarEl)
+		progressBarEl.append(progressSpanEl)
+		progressContainerChaseEl.append(progressNoteEl)
+		this.idMap = {}
+		const candidates = restData.data.candidates
+		for (let position in candidates) {
+			const pos = position.substring(0, 3).toLowerCase()
+			const container = {
+				classes: [
+					'container'
+				],
+				id: `${pos}-container`,
+			}
+			const containerHeader = {
+				classes: [
+					'header'
+				],
+				id: `${pos}-header`,
+				text: position,
+			}
+			const containerChase = {
+				classes: [
+					'chase'
+				],
+				id: `${pos}-chase`,
+			}
+			const containerEl = Helper.toDom(container)
+			const containerHeaderEl = Helper.toDom(containerHeader)
+			const containerChaseEl = Helper.toDom(containerChase)
+			containerEl.append(containerHeaderEl)
+			containerEl.append(containerChaseEl)
+			candidates[position].forEach(name => {
+				const candidate = Helper.toId(name)
+				const candId = `${pos}-${candidate}`
+				const chaseRow = {
+					classes: [
+						'chase-row'
+					],
+					id: `${candId}-chase-row`,
+				}
+				const candName = {
+					classes: [
+						'chase-row-cpt', 'cand-name'
+					],
+					text: name,
+				}
+				const candProgress = {
+					classes: [
+						'chase-row-cpt', 'cand-progress'
+					],
+					id: `${candId}-cand-prog`,
+				}
+				const candVote = {
+					classes: [
+						'chase-row-cpt', 'cand-vote'
+					],
+					id: `${candId}-cand-vote`,
+					text: '0',
+				}
+				const candCaret = {
+					tag: 'i',
+					classes: [
+						'fa', 'fa-2x', 'fa-caret-up', 'cand-caret', `${pos}-cand-caret`
+					],
+					id: `${candId}-cand-caret`,
+				}
+				const chaseRowEl = Helper.toDom(chaseRow)
+				const candNameEl = Helper.toDom(candName)
+				const candProgressEl = Helper.toDom(candProgress)
+				const candVoteEl = Helper.toDom(candVote)
+				const candCaretEl = Helper.toDom(candCaret)
+				chaseRowEl.append(candNameEl)
+				chaseRowEl.append(candProgressEl)
+				chaseRowEl.append(candVoteEl)
+				chaseRowEl.append(candCaretEl)
+				containerChaseEl.append(chaseRowEl)
+				this.idMap[candId] = {
+					row: chaseRowEl,
+					progress: candProgressEl,
+					vote: candVoteEl,
+					count: 0,
+				}
+			})
+			parent.append(containerEl)
+		}
+	}
+	updateCaret(pos, candidate) {
+		Array.prototype.slice.call(document.getElementsByClassName(`${pos}-cand-caret`)).forEach(caret =>{
+			if (caret.id.includes(candidate)) {
+				caret.classList.add('display')
+			} else {
+				caret.classList.remove('display')
+			}
+		})
+	}
+	incCandidate(id) {
+		const target = this.idMap[id]
+		target.count++
+		target.progress.style.width = `${target.count * this.perPixel}px`
+		target.vote.innerHTML = target.count
+	}
+	incSummary() {
+		this.summary.totalVotes++
+		const { electionSummaryEl, progressBarEl, progressSpanEl, totalVotes } = this.summary
+		electionSummaryEl.innerHTML = `total votes opened: ${totalVotes}`
+		const progressWidth = Math.min(totalVotes * 100 / config.minVote, 100)
+		progressBarEl.style.width = `${progressWidth}%`
+		progressSpanEl.innerHTML = `${totalVotes}/${config.minVote}`
+		if (totalVotes >= config.minVote) {
+			progressBarEl.classList.remove('progress-bar-danger')
+			progressBarEl.classList.add('progress-bar-success')
+		} else {
+			progressBarEl.classList.add('progress-bar-danger')
+		}
+	}
+	extractVote(vote) {
+		if (!vote) {
+			return
+		}
+		const pre = Helper.toId(vote.pre)
+		const preId = `pre-${pre}`
+		this.incCandidate(preId)
+		this.updateCaret('pre', pre)
+		const vic = Helper.toId(vote.vic)
+		const vicId = `vic-${vic}`
+		this.incCandidate(vicId)
+		this.updateCaret('vic', vic)
+		const sec = Helper.toId(vote.sec)
+		const secId = `sec-${sec}`
+		this.incCandidate(secId)
+		this.updateCaret('sec', sec)
+		this.incSummary()
+	}
+	showElected() {
+		const result = {}
+		for (let id in this.idMap) {
+			const record = this.idMap[id]
+			const pos = id.substring(0, 3)
+			if (!result[pos] || result[pos].count < record.count) {
+				result[pos] = record
+			}
+		}
+		console.log(result)
+		for (let pos in result) {
+			result[pos].row.classList.add('elected')
+		}
+	}
+}
+const ClockConst = {
+	unit: 'ms',
+	chase: moment(config.chase),
+	annouce: moment(config.annouce),
+}
+const Clock = {
+	timeToChase: () => {
+		const now = moment()
+		return ClockConst.chase.diff(now, ClockConst.unit)
+	},
+	formatDuration: (value) => {
+		return moment.utc(moment.duration(value).asMilliseconds()).format('HH:mm:ss')
+	}
+}
+class Scheduler {
+	constructor(interval) {
+		this.interval = interval
+		this.votes = restData.data.votes
+		const elapsed = Clock.timeToChase()
+		if (elapsed > 0) {
+			this.toBeOpened(elapsed)
+		} else {
+			this.loadChase(-elapsed)
+		}
+	}
+	countdown(messageEl) {
+		const loop = setInterval(() => {
+			const timeToChase = Clock.timeToChase()
+			if (timeToChase <= 0) {
+				clearInterval(loop)
+				window.location = window.location.href
+			} else {
+				const pending = Clock.formatDuration(timeToChase)
+				messageEl.innerHTML = config.preChaseMsg + pending
+			}
+		}, 1000)
+	}
+	toBeOpened(timeToChase) {
+		const parent = document.getElementsByClassName('entry-content')[0]
+		const message = {
+			id: 'time-to-chase',
+			text: config.preChaseMsg + Clock.formatDuration(timeToChase)
+		}
+		const messageEl = Helper.toDom(message)
+		parent.append(messageEl)
+		this.countdown(messageEl)
+	}
+	loadChase(elapsed) {
+		const chaseManager = new ChaseManager()
+		const noVotes = this.votes.length
+		const elapsedSlots = Math.floor(elapsed / this.interval)
+		const slots = Math.min(elapsedSlots, noVotes)
+		for (let i = 0; i < slots; i++) {
+			chaseManager.extractVote(this.votes[i])
+		}
+		if (slots === noVotes) {
+			chaseManager.showElected()
+		} else {
+			let counter = slots
+			const loop = setInterval(() => {
+				if (counter >= noVotes) {
+					clearInterval(loop)
+					chaseManager.showElected()
+				} else {
+					chaseManager.extractVote(this.votes[counter++])
+				}
+			}, this.interval)
+		}
+	}
+}
+const onErr = () => {
+	const message = {
+		tag: 'h1',
+		text: 'Thank you for voting!',
+	}
+	const messageEl = Helper.toDom(message)
+	messageEl.style['text-align'] = 'center'
+	const hint = {
+		tag: 'p',
+		text: 'The results will be available here from <strong>8pm, 31st March 2018!</strong>',
+	}
+	const hintEl = Helper.toDom(hint)
+	hintEl.style['text-align'] = 'center'
+	const parent = document.getElementsByClassName('entry-content')[0]
+	parent.append(messageEl)
+	parent.append(hintEl)
+}
+class Data {
+	constructor() {
+		const url = config.url
+		const instance = this
+		Request.get(url, res => {
+			instance.data = JSON.parse(res).data
+			const scheduler = new Scheduler(config.interval)
+		}, onErr)
+	}
+}
+const restData = new Data()
+</script>

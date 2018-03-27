@@ -1,0 +1,116 @@
+/* Page header */
+.entry-title, .entry-title a {
+    text-align: center;
+    font-size: 5em;
+}
+#election-summary {
+    text-align: center;
+    font-size: 3em;
+    text-transform: uppercase;
+}
+#time-to-chase {
+    background: #f0cf0c;
+    color: white;
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 4vh;
+    font-weight: bold;
+}
+.progress {
+    position: relative;
+    margin: 10px;
+    height: 30px !important;
+}
+.progress .progress-span {
+    position: absolute;
+    display: block;
+    width: 100%;
+    color: black;
+    font-style: italic;
+    line-height: 30px;
+    font-size: 3vh;
+}
+.progress-note {
+    color: black;
+    font-style: italic;
+    line-height: 30px;
+    font-size: 2vh;
+    margin-right: 10px;
+    margin-left: 10px;
+    text-align: center;
+}
+.menu-toggle {
+    display: none !important;
+}
+i.cand-caret {
+    display: none;
+    vertical-align: middle;
+    color: #0ff50f;
+}
+i.cand-caret.display {
+    display: inline;
+}
+.elected {
+    outline: solid thick #33df0d;
+    background: #33df0d;
+}
+.elected .cand-name {
+    background: white;
+    color: #33df0d;
+}
+.elected .cand-progress {
+    background: white;
+    color: #33df0d;   
+}
+.elected .cand-vote {
+    color: white;
+}
+
+/* Chasing stuff */
+.container {
+    width: 100%;
+}
+
+.header {
+    width: 100%;
+    font-size: 2em;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: rgb(0,0,0);
+    padding: 0.5em;
+    text-align: center;
+}
+
+.minimum,
+.chase,
+.chase-row {
+    width: 100%;
+    margin: 10px;
+}
+
+.chase-row-cpt {
+    vertical-align: middle;
+    display: inline-block;
+    white-space: normal;
+    height: 2.5em;
+    font-weight: bold;
+    font-size: 1.25em;
+    text-transform: uppercase;
+    line-height: 2.5em;
+    margin-right: 10px;
+}
+
+.cand-name {
+    background: #CCC;
+    width: 30%;
+    color: #FFF;
+    padding-left: 0.5em;
+}
+
+.cand-progress {
+    background: #E7B220;
+}
+
+.cand-vote {
+    color: #E7B220;
+}
